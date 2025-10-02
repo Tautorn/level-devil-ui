@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Devil - Interface de Zoom</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 2px solid #00ff00;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        button {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: #00ff00;
+            color: #1a1a1a;
+            box-shadow: 0 0 15px #00ff00;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .zoom-level {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #ffff00;
+        }
+
+        .warning {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+            font-size: 0.9em;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .devil-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .frustration-counter {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="devil-icon">😈</div>
+        <h1>Level Devil</h1>
+        <h2>Interface de Zoom</h2>
+        
+        <div class="zoom-controls">
+            <button id="zoomIn">🔍+ Zoom In</button>
+            <button id="zoomOut">🔍- Zoom Out</button>
+        </div>
+        
+        <div class="zoom-level" id="zoomLevel">Zoom: 100%</div>
+        <div class="frustration-counter" id="frustrationCounter">Tentativas: 0</div>
+        
+        <div class="warning">
+            ⚠️ ATENÇÃO: Esta interface funciona de forma não convencional. 
+            O zoom pode não se comportar como esperado!
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 1;
+        let attempts = 0;
+        const container = document.getElementById('mainContainer');
+        const zoomLevel = document.getElementById('zoomLevel');
+        const frustrationCounter = document.getElementById('frustrationCounter');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+
+        function updateDisplay() {
+            zoomLevel.textContent = `Zoom: ${Math.round(currentZoom * 100)}%`;
+            frustrationCounter.textContent = `Tentativas: ${attempts}`;
+        }
+
+        function applyZoom() {
+            container.style.transform = `scale(${currentZoom})`;
+            updateDisplay();
+        }
+
+        zoomInBtn.addEventListener('click', () => {
+            attempts++;
+            currentZoom = Math.max(0.1, currentZoom - 0.1);
+            applyZoom();
+            
+            zoomInBtn.style.background = '#ff0000';
+            setTimeout(() => {
+                zoomInBtn.style.background = '';
+            }, 200);
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            attempts++;
+            currentZoom = Math.min(3, currentZoom + 0.1);
+            applyZoom();
+            
+            zoomOutBtn.style.background = '#ff0000';
+            setTimeout(() => {
+                zoomOutBtn.style.background = '';
+            }, 200);
+        });
+
+        setInterval(() => {
+            if (Math.random() < 0.1) {
+                container.style.filter = 'hue-rotate(180deg)';
+                setTimeout(() => {
+                    container.style.filter = '';
+                }, 100);
+            }
+        }, 2000);
+
+        updateDisplay();
+    </script>
+</body>
+</html>

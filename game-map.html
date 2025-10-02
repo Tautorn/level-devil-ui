@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Devil - Game Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a1a, #2d2d2d);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .devil-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        h1 {
+            font-size: 3em;
+            text-shadow: 0 0 20px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #ffff00;
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: #00ff00;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+            border-color: #ffff00;
+        }
+
+        .game-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffff00;
+        }
+
+        .game-description {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #cccccc;
+            text-align: center;
+        }
+
+        .game-difficulty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-label {
+            font-size: 0.9em;
+            margin-right: 10px;
+            color: #ffff00;
+        }
+
+        .difficulty-stars {
+            display: flex;
+            gap: 3px;
+        }
+
+        .star {
+            color: #ff0000;
+            font-size: 1.2em;
+        }
+
+        .star.filled {
+            color: #ff0000;
+        }
+
+        .star.empty {
+            color: #333;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 0.9em;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .status-available {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .status-coming-soon {
+            background: rgba(255, 255, 0, 0.2);
+            color: #ffff00;
+            border: 1px solid #ffff00;
+        }
+
+        .status-beta {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+
+        .map-legend {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 10px;
+        }
+
+        .legend-title {
+            font-size: 1.5em;
+            color: #ffff00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-icon {
+            font-size: 1.5em;
+        }
+
+        .legend-text {
+            font-size: 0.9em;
+        }
+
+        .back-to-server {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-to-server:hover {
+            background: #00ff00;
+            color: #1a1a1a;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @media (max-width: 768px) {
+            .map-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-to-server">← Voltar ao Servidor</a>
+    
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="header">
+        <div class="devil-icon">😈</div>
+        <h1>Level Devil</h1>
+        <div class="subtitle">🗺️ Mapa dos Jogos Satíricos</div>
+    </div>
+
+    <div class="map-container">
+        <div class="map-grid" id="gamesGrid">
+        </div>
+
+        <div class="map-legend">
+            <div class="legend-title">📋 Legenda do Mapa</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-icon">🟢</span>
+                    <span class="legend-text">Jogo Disponível</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🟡</span>
+                    <span class="legend-text">Em Desenvolvimento</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🔴</span>
+                    <span class="legend-text">Versão Beta</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">⭐</span>
+                    <span class="legend-text">Dificuldade (1-5 estrelas)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gamesData = {
+            'zoom-interface.html': {
+                title: 'Zoom Interface',
+                icon: '🔍',
+                description: 'Interface de zoom com lógica completamente invertida. Zoom in diminui, zoom out aumenta! Prepare-se para a frustração máxima.',
+                difficulty: 3,
+                status: 'available',
+                category: 'Interface'
+            },
+            'password-puzzle.html': {
+                title: 'Password Puzzle',
+                icon: '🔐',
+                description: 'Resolva o puzzle para desbloquear o teclado, mas você tem apenas 3 segundos para digitar cada caractere da senha!',
+                difficulty: 5,
+                status: 'available',
+                category: 'Puzzle'
+            },
+            'game-map.html': {
+                title: 'Game Map',
+                icon: '🗺️',
+                description: 'Este próprio mapa de navegação! Uma interface central para acessar todos os jogos satíricos do Level Devil.',
+                difficulty: 1,
+                status: 'available',
+                category: 'Navegação'
+            }
+        };
+
+        function createDifficultyStars(difficulty) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star ${i <= difficulty ? 'filled' : 'empty'}">★</span>`;
+            }
+            return stars;
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'available': return 'status-available';
+                case 'coming-soon': return 'status-coming-soon';
+                case 'beta': return 'status-beta';
+                default: return 'status-available';
+            }
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'available': return '✅ Disponível';
+                case 'coming-soon': return '⏳ Em Breve';
+                case 'beta': return '🧪 Versão Beta';
+                default: return '✅ Disponível';
+            }
+        }
+
+        function createGameCard(filename, gameData) {
+            return `
+                <a href="${filename}" class="game-card" data-game="${filename}">
+                    <div class="game-icon">${gameData.icon}</div>
+                    <div class="game-title">${gameData.title}</div>
+                    <div class="game-description">${gameData.description}</div>
+                    <div class="game-difficulty">
+                        <span class="difficulty-label">Dificuldade:</span>
+                        <div class="difficulty-stars">${createDifficultyStars(gameData.difficulty)}</div>
+                    </div>
+                    <div class="game-status ${getStatusClass(gameData.status)}">
+                        ${getStatusText(gameData.status)}
+                    </div>
+                </a>
+            `;
+        }
+
+        function loadGames() {
+            const gamesGrid = document.getElementById('gamesGrid');
+            let gamesHTML = '';
+
+            Object.entries(gamesData).forEach(([filename, gameData]) => {
+                gamesHTML += createGameCard(filename, gameData);
+            });
+
+            gamesGrid.innerHTML = gamesHTML;
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function randomGlitch() {
+            if (Math.random() < 0.1) {
+                document.body.classList.add('glitch-effect');
+                setTimeout(() => {
+                    document.body.classList.remove('glitch-effect');
+                }, 300);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const gameCard = e.target.closest('.game-card');
+            if (gameCard) {
+                gameCard.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    gameCard.style.transform = '';
+                }, 150);
+            }
+        });
+
+        loadGames();
+        createParticles();
+        
+        setInterval(randomGlitch, 5000);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.game-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.borderColor = '#ffff00';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.borderColor = '#00ff00';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

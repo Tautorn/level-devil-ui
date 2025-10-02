@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Devil - Slingshot Progress</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .devil-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #333;
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-marker {
+            position: absolute;
+            top: -5px;
+            width: 4px;
+            height: 40px;
+            background: #00ff00;
+            border-radius: 2px;
+            transform: translateX(-2px);
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .current-value {
+            font-size: 2em;
+            color: #ffff00;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .slingshot-area {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slingshot {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .slingshot-base {
+            width: 80px;
+            height: 80px;
+            background: #8B4513;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border: 3px solid #654321;
+        }
+
+        .slingshot-fork {
+            position: absolute;
+            width: 4px;
+            height: 60px;
+            background: #8B4513;
+            border-radius: 2px;
+        }
+
+        .slingshot-fork.left {
+            left: 20px;
+            top: 0;
+            transform: rotate(-20deg);
+        }
+
+        .slingshot-fork.right {
+            right: 20px;
+            top: 0;
+            transform: rotate(20deg);
+        }
+
+        .slingshot-band {
+            position: absolute;
+            width: 2px;
+            height: 40px;
+            background: #8B4513;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+            border-radius: 1px;
+        }
+
+        .ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff0000, #cc0000);
+            border-radius: 50%;
+            cursor: grab;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .ball:active {
+            cursor: grabbing;
+        }
+
+        .ball.trajectory {
+            background: radial-gradient(circle, #ffff00, #cccc00);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+        }
+
+        .trajectory-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 0, 0.5);
+            transform-origin: left center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .instructions h3 {
+            color: #ffff00;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+            color: #cccccc;
+        }
+
+        .instructions li::before {
+            content: '🎯 ';
+            margin-right: 5px;
+        }
+
+        .power-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .power-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .reset-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #ff0000;
+            color: #1a1a1a;
+        }
+
+        .status-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .ball-trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeOut 1s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="devil-icon">😈</div>
+            <h1>Level Devil</h1>
+            <h2>Slingshot Progress</h2>
+        </div>
+
+        <div class="game-area">
+            <div class="instructions">
+                <h3>🎯 Como Jogar:</h3>
+                <ul>
+                    <li>Arraste a bolinha para trás</li>
+                    <li>Solte para lançar</li>
+                    <li>Onde a bolinha cair = valor de 0-100</li>
+                    <li>Use a força para controlar a distância</li>
+                </ul>
+            </div>
+
+            <div class="reset-btn" onclick="resetGame()">🔄 Reset</div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-marker" id="progressMarker"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
+                </div>
+            </div>
+
+            <div class="current-value" id="currentValue">0</div>
+
+            <div class="slingshot-area" id="slingshotArea">
+                <div class="slingshot">
+                    <div class="slingshot-base"></div>
+                    <div class="slingshot-fork left"></div>
+                    <div class="slingshot-fork right"></div>
+                    <div class="slingshot-band"></div>
+                </div>
+                <div class="ball" id="ball"></div>
+            </div>
+
+            <div class="power-indicator">
+                <div>Força do Lançamento:</div>
+                <div class="power-bar">
+                    <div class="power-fill" id="powerFill"></div>
+                </div>
+                <div id="powerText">0%</div>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            currentValue: 0,
+            isDragging: false,
+            dragStart: { x: 0, y: 0 },
+            ballPosition: { x: 0, y: 0 },
+            power: 0,
+            isLaunched: false,
+            ballVelocity: { x: 0, y: 0 },
+            ballTrail: []
+        };
+
+        const ball = document.getElementById('ball');
+        const progressFill = document.getElementById('progressFill');
+        const progressMarker = document.getElementById('progressMarker');
+        const currentValue = document.getElementById('currentValue');
+        const powerFill = document.getElementById('powerFill');
+        const powerText = document.getElementById('powerText');
+        const statusMessage = document.getElementById('statusMessage');
+        const slingshotArea = document.getElementById('slingshotArea');
+
+        const SLINGSHOT_CENTER = { x: 50, y: 50 };
+        const MAX_PULL_DISTANCE = 80;
+        const GRAVITY = 0.5;
+        const FRICTION = 0.98;
+        const BOUNCE = 0.7;
+
+        function initGame() {
+            gameState.currentValue = 0;
+            gameState.isDragging = false;
+            gameState.isLaunched = false;
+            gameState.power = 0;
+            gameState.ballTrail = [];
+            
+            resetBallPosition();
+            updateDisplay();
+            clearStatus();
+        }
+
+        function resetBallPosition() {
+            gameState.ballPosition = { x: SLINGSHOT_CENTER.x, y: SLINGSHOT_CENTER.y };
+            ball.style.left = gameState.ballPosition.x + 'px';
+            ball.style.top = gameState.ballPosition.y + 'px';
+            ball.style.transform = 'translate(-50%, -50%)';
+        }
+
+        function updateDisplay() {
+            progressFill.style.width = gameState.currentValue + '%';
+            progressMarker.style.left = gameState.currentValue + '%';
+            currentValue.textContent = Math.round(gameState.currentValue);
+            
+            powerFill.style.width = gameState.power + '%';
+            powerText.textContent = Math.round(gameState.power) + '%';
+        }
+
+        function getDistance(point1, point2) {
+            const dx = point2.x - point1.x;
+            const dy = point2.y - point1.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getAngle(point1, point2) {
+            return Math.atan2(point2.y - point1.y, point2.x - point1.x);
+        }
+
+        function showStatus(message, duration = 2000) {
+            statusMessage.textContent = message;
+            statusMessage.classList.add('show');
+            
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, duration);
+        }
+
+        function clearStatus() {
+            statusMessage.classList.remove('show');
+        }
+
+        function createBallTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'ball-trail';
+            trail.style.left = x + 'px';
+            trail.style.top = y + 'px';
+            slingshotArea.appendChild(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 1000);
+        }
+
+        function updateBallPhysics() {
+            if (!gameState.isLaunched) return;
+
+            gameState.ballVelocity.y += GRAVITY;
+            
+            gameState.ballVelocity.x *= FRICTION;
+            gameState.ballVelocity.y *= FRICTION;
+            
+            gameState.ballPosition.x += gameState.ballVelocity.x;
+            gameState.ballPosition.y += gameState.ballVelocity.y;
+            
+            if (Math.random() < 0.3) {
+                createBallTrail(gameState.ballPosition.x, gameState.ballPosition.y);
+            }
+            
+            if (gameState.ballPosition.y >= 250) {
+                gameState.ballPosition.y = 250;
+                gameState.ballVelocity.y *= -BOUNCE;
+                gameState.ballVelocity.x *= FRICTION;
+                
+                if (Math.abs(gameState.ballVelocity.y) < 0.5 && Math.abs(gameState.ballVelocity.x) < 0.5) {
+                    gameState.isLaunched = false;
+                    calculateFinalValue();
+                }
+            }
+            
+            if (gameState.ballPosition.x <= 10) {
+                gameState.ballPosition.x = 10;
+                gameState.ballVelocity.x *= -BOUNCE;
+            } else if (gameState.ballPosition.x >= 590) {
+                gameState.ballPosition.x = 590;
+                gameState.ballVelocity.x *= -BOUNCE;
+            }
+            
+ visual
+            ball.style.left = gameState.ballPosition.x + 'px';
+            ball.style.top = gameState.ballPosition.y + 'px';
+        }
+
+        function calculateFinalValue() {
+            const progressBarWidth = 600; // Largura da barra de progresso
+            const ballX = gameState.ballPosition.x;
+            
+            let value = (ballX / progressBarWidth) * 100;
+            value = Math.max(0, Math.min(100, value));
+            
+            gameState.currentValue = value;
+            updateDisplay();
+            
+            if (value >= 90) {
+                showStatus('🎉 PERFEITO! Valor máximo alcançado!', 3000);
+            } else if (value >= 70) {
+                showStatus('🔥 Excelente! Muito próximo do máximo!', 2500);
+            } else if (value >= 50) {
+                showStatus('👍 Bom trabalho! Valor médio alcançado!', 2000);
+            } else if (value >= 30) {
+                showStatus('😐 Não foi mal, mas pode melhorar!', 2000);
+            } else {
+                showStatus('😅 Precisa de mais prática!', 2000);
+            }
+        }
+
+        ball.addEventListener('mousedown', (e) => {
+            if (gameState.isLaunched) return;
+            
+            gameState.isDragging = true;
+            gameState.dragStart = { x: e.clientX, y: e.clientY };
+            ball.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!gameState.isDragging || gameState.isLaunched) return;
+            
+            const rect = slingshotArea.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const distance = getDistance(
+                { x: mouseX, y: mouseY },
+                { x: SLINGSHOT_CENTER.x, y: SLINGSHOT_CENTER.y }
+            );
+            
+            if (distance <= MAX_PULL_DISTANCE) {
+                gameState.ballPosition = { x: mouseX, y: mouseY };
+                gameState.power = (distance / MAX_PULL_DISTANCE) * 100;
+                
+                ball.style.left = gameState.ballPosition.x + 'px';
+                ball.style.top = gameState.ballPosition.y + 'px';
+                updateDisplay();
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!gameState.isDragging || gameState.isLaunched) return;
+            
+            gameState.isDragging = false;
+            gameState.isLaunched = true;
+            ball.style.cursor = 'default';
+            
+            const angle = getAngle(
+                { x: SLINGSHOT_CENTER.x, y: SLINGSHOT_CENTER.y },
+                gameState.ballPosition
+            );
+            
+            const force = gameState.power / 100;
+            gameState.ballVelocity = {
+                x: Math.cos(angle) * force * 15,
+                y: Math.sin(angle) * force * 15
+            };
+            
+            showStatus('🚀 Bolinha lançada!', 1000);
+        });
+
+        function gameLoop() {
+            updateBallPhysics();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            initGame();
+            showStatus('🔄 Jogo resetado!', 1500);
+        }
+
+        setInterval(() => {
+            if (Math.random() < 0.05) {
+                document.body.classList.add('glitch-effect');
+                setTimeout(() => {
+                    document.body.classList.remove('glitch-effect');
+                }, 300);
+            }
+        }, 3000);
+
+        initGame();
+        gameLoop();
+    </script>
+</body>
+</html>

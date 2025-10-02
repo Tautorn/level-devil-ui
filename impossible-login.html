@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Devil - Impossible Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            border: 2px solid #00ff00;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 30px #00ff00;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .devil-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: #ffff00;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .requirements {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .requirements h3 {
+            color: #ff0000;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .requirement {
+            margin: 8px 0;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .requirement.valid {
+            color: #00ff00;
+        }
+
+        .requirement.invalid {
+            color: #ff0000;
+        }
+
+        .requirement-icon {
+            font-size: 1.2em;
+        }
+
+        .password-strength {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .strength-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        .login-btn {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px 0;
+        }
+
+        .login-btn:hover {
+            background: #00ff00;
+            color: #1a1a1a;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .login-btn:disabled {
+            background: #333;
+            border-color: #666;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-message.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+
+        .status-message.success {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .attempts-counter {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            color: #ffff00;
+            font-size: 0.9em;
+        }
+
+        .hint {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .impossible-notice {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ff0000;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="devil-icon">😈</div>
+        <h1>Level Devil</h1>
+        <h2>Impossible Login</h2>
+        
+        <div class="impossible-notice">
+            ⚠️ ATENÇÃO: Este sistema de login possui requisitos de segurança extremamente rigorosos!
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">👤 Usuário:</label>
+                <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">🔐 Senha:</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+            </div>
+
+            <div class="password-strength">
+                <div class="strength-text">Força da Senha:</div>
+                <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill"></div>
+                </div>
+                <div class="strength-text" id="strengthText">Muito fraca</div>
+            </div>
+
+            <div class="requirements">
+                <h3>📋 Requisitos Obrigatórios da Senha:</h3>
+                <div id="requirementsList">
+                </div>
+            </div>
+
+            <div class="hint" id="hint">
+                💡 Dica: A senha deve satisfazer TODOS os requisitos simultaneamente!
+            </div>
+
+            <div class="attempts-counter" id="attemptsCounter">
+                Tentativas: 0/5
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                🚀 Fazer Login
+            </button>
+
+            <div class="status-message" id="statusMessage" style="display: none;"></div>
+        </form>
+    </div>
+
+    <script>
+        let gameState = {
+            attempts: 0,
+            maxAttempts: 5,
+            currentRequirements: [],
+            username: '',
+            password: ''
+        };
+
+        const impossibleRequirements = [
+            {
+                id: 'length',
+                text: 'Ter exatamente 12 caracteres',
+                validate: (pwd) => pwd.length === 12,
+                impossible: true
+            },
+            {
+                id: 'flag',
+                text: 'Conter a bandeira do Brasil 🇧🇷',
+                validate: (pwd) => pwd.includes('🇧🇷'),
+                impossible: true
+            },
+            {
+                id: 'emoji',
+                text: 'Ter um emoji de coração ❤️',
+                validate: (pwd) => pwd.includes('❤️'),
+                impossible: true
+            },
+            {
+                id: 'number',
+                text: 'Conter o número 42',
+                validate: (pwd) => pwd.includes('42'),
+                impossible: true
+            },
+            {
+                id: 'uppercase',
+                text: 'Ter pelo menos 3 letras maiúsculas',
+                validate: (pwd) => (pwd.match(/[A-Z]/g) || []).length >= 3,
+                impossible: true
+            },
+            {
+                id: 'lowercase',
+                text: 'Ter pelo menos 3 letras minúsculas',
+                validate: (pwd) => (pwd.match(/[a-z]/g) || []).length >= 3,
+                impossible: true
+            },
+            {
+                id: 'special',
+                text: 'Ter pelo menos 2 caracteres especiais (!@#$%^&*)',
+                validate: (pwd) => (pwd.match(/[!@#$%^&*]/g) || []).length >= 2,
+                impossible: true
+            },
+            {
+                id: 'sum',
+                text: 'A soma dos números deve ser 100',
+                validate: (pwd) => {
+                    const numbers = pwd.match(/\d/g);
+                    if (!numbers) return false;
+                    return numbers.reduce((sum, num) => sum + parseInt(num), 0) === 100;
+                },
+                impossible: true
+            },
+            {
+                id: 'noSpaces',
+                text: 'NÃO pode ter espaços',
+                validate: (pwd) => !pwd.includes(' '),
+                impossible: true
+            },
+            {
+                id: 'vowel',
+                text: 'Deve começar com uma vogal (A, E, I, O, U)',
+                validate: (pwd) => /^[AEIOU]/.test(pwd),
+                impossible: true
+            }
+        ];
+
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('password');
+        const requirementsList = document.getElementById('requirementsList');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const attemptsCounter = document.getElementById('attemptsCounter');
+        const statusMessage = document.getElementById('statusMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const hint = document.getElementById('hint');
+
+        function initGame() {
+            gameState.attempts = 0;
+            gameState.currentRequirements = getRandomRequirements(6);
+            updateRequirementsDisplay();
+            updateAttemptsDisplay();
+            clearStatus();
+        }
+
+        function getRandomRequirements(count) {
+            const shuffled = [...impossibleRequirements].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function updateRequirementsDisplay() {
+            requirementsList.innerHTML = gameState.currentRequirements.map(req => `
+                <div class="requirement" id="req-${req.id}">
+                    <span class="requirement-icon">❌</span>
+                    <span>${req.text}</span>
+                </div>
+            `).join('');
+        }
+
+        function validatePassword(password) {
+            let validCount = 0;
+            let totalCount = gameState.currentRequirements.length;
+
+            gameState.currentRequirements.forEach(req => {
+                const isValid = req.validate(password);
+                const reqElement = document.getElementById(`req-${req.id}`);
+                
+                if (isValid) {
+                    validCount++;
+                    reqElement.className = 'requirement valid';
+                    reqElement.querySelector('.requirement-icon').textContent = '✅';
+                } else {
+                    reqElement.className = 'requirement invalid';
+                    reqElement.querySelector('.requirement-icon').textContent = '❌';
+                }
+            });
+
+            return { validCount, totalCount, isValid: validCount === totalCount };
+        }
+
+        function updatePasswordStrength(password) {
+            const validation = validatePassword(password);
+            const percentage = (validation.validCount / validation.totalCount) * 100;
+            
+            strengthFill.style.width = percentage + '%';
+            
+            if (percentage === 100) {
+                strengthText.textContent = 'Perfeita! (Impossível)';
+                strengthText.style.color = '#00ff00';
+            } else if (percentage >= 80) {
+                strengthText.textContent = 'Muito forte';
+                strengthText.style.color = '#00ff00';
+            } else if (percentage >= 60) {
+                strengthText.textContent = 'Forte';
+                strengthText.style.color = '#ffff00';
+            } else if (percentage >= 40) {
+                strengthText.textContent = 'Média';
+                strengthText.style.color = '#ff8800';
+            } else if (percentage >= 20) {
+                strengthText.textContent = 'Fraca';
+                strengthText.style.color = '#ff4400';
+            } else {
+                strengthText.textContent = 'Muito fraca';
+                strengthText.style.color = '#ff0000';
+            }
+        }
+
+        function updateAttemptsDisplay() {
+            attemptsCounter.textContent = `Tentativas: ${gameState.attempts}/${gameState.maxAttempts}`;
+            
+            if (gameState.attempts >= gameState.maxAttempts - 1) {
+                attemptsCounter.style.background = 'rgba(255, 0, 0, 0.3)';
+                attemptsCounter.style.borderColor = '#ff0000';
+                attemptsCounter.style.color = '#ff0000';
+            }
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+        }
+
+        function clearStatus() {
+            statusMessage.style.display = 'none';
+        }
+
+        function triggerGlitch() {
+            document.body.classList.add('glitch-effect');
+            setTimeout(() => {
+                document.body.classList.remove('glitch-effect');
+            }, 300);
+        }
+
+        function triggerShake() {
+            loginForm.classList.add('shake');
+            setTimeout(() => {
+                loginForm.classList.remove('shake');
+            }, 500);
+        }
+
+        function generateImpossibleHint() {
+            const hints = [
+                '💡 Dica: A senha deve satisfazer TODOS os requisitos simultaneamente!',
+                '🤔 Dica: Tente usar caracteres especiais e números!',
+                '😈 Dica: Este sistema foi projetado para ser impossível!',
+                '💀 Dica: Boa sorte tentando satisfazer requisitos contraditórios!',
+                '🔥 Dica: Talvez você precise de uma senha de 50+ caracteres!',
+                '⚡ Dica: Alguns requisitos podem ser mutuamente exclusivos!'
+            ];
+            
+            const randomHint = hints[Math.floor(Math.random() * hints.length)];
+            hint.textContent = randomHint;
+        }
+
+        passwordInput.addEventListener('input', (e) => {
+            updatePasswordStrength(e.target.value);
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            gameState.attempts++;
+            updateAttemptsDisplay();
+            
+            const validation = validatePassword(password);
+            
+            if (validation.isValid) {
+                showStatus('🎉 LOGIN REALIZADO COM SUCESSO! (Isso é impossível!)', 'success');
+                triggerGlitch();
+            } else {
+                if (gameState.attempts >= gameState.maxAttempts) {
+                    showStatus('💀 MUITAS TENTATIVAS! Sistema bloqueado por 30 segundos!', 'error');
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = '🔒 BLOQUEADO';
+                    
+                    setTimeout(() => {
+                        initGame();
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🚀 Fazer Login';
+                        document.getElementById('password').value = '';
+                        generateImpossibleHint();
+                    }, 30000);
+                } else {
+                    showStatus(`❌ Senha inválida! ${validation.validCount}/${validation.totalCount} requisitos atendidos.`, 'error');
+                    triggerShake();
+                    generateImpossibleHint();
+                }
+            }
+        });
+
+ aleatório
+        setInterval(() => {
+            if (Math.random() < 0.05) {
+                triggerGlitch();
+            }
+        }, 3000);
+
+        initGame();
+    </script>
+</body>
+</html>
